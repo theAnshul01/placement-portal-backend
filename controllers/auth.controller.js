@@ -70,9 +70,7 @@ export const login = async (req, res, next) => {
             })
         }
 
-        if(user.role !== "ADMIN" && 
-            user.verificationStatus !== "APPROVED"
-        ){
+        if(user.verificationStatus !== "VERIFIED"){
             return res.status(403).json({
                 message: "User is not verified"
             })
@@ -210,42 +208,52 @@ export const logout = async (req, res, next) => {
     }
 }
 
-// ! for testing purpose only
-export const createStudent = async (req, res, next) => {
+export const resetPassword = async (req, res, next) => {
     try {
-        const { name, email, password } = req.body;
+        const { token, newPassword } = req.body
 
-        if (!name || !email || !password) {
+        if(!token || !newPassword){
             return res.status(400).json({
-                message: "All fields are required"
+                message: "Token and new password are required"
             })
         }
 
-        const existingUser = await User.findOne({ email }).exec()
+        // find user by reset token
+        const user = await User.findOne({ resetPasswordToken : token }).exec()
 
-        if (existingUser) {
-            return res.status(409).json({
-                message: "Student already exists"
+        if(!user){
+            return res.status(400).json({
+                message: "Invalid or already used reset token"
             })
         }
 
-        const hashedPassword = await brcypt.hash(password, 10)
+        if(user?.resetPasswordExpiresAt < Date.now()){
+            return res.status(400).json({
+                message: "Reset token has expired"
+            })
+        }
 
-        const student = await User.create({
-            name,
-            email,
-            password: hashedPassword,
-            role: "STUDENT",
-            verificationStatus: "VERIFIED",
-            isActive: true
-        })
+        const hashedPassword = await brcypt.hash(newPassword, 10)
 
-        res.status(201).json({
-            message: "Student created successfully",
-            adminId: student._id
+        user.password = hashedPassword
+
+        user.isActive = true
+        user.verificationStatus = "VERIFIED"
+
+        user.verifiedAt = new Date()
+        user.verifiedBy = null
+
+        // invalidate resettoken props
+        user.resetPasswordToken = null
+        user.resetPasswordExpiresAt = null
+
+        await user.save()
+
+        return res.status(200).json({
+            message: "Password reset successful. You can now login"
         })
 
     } catch (error) {
         next(error)
     }
-}
+}   

@@ -50,6 +50,12 @@ const userSchema = new mongoose.Schema(
     },
     deactivationReason: {
         type: String,
+    },
+    resetPasswordToken: {
+        type: String
+    },
+    resetPasswordExpiresAt: {
+        type: Date
     }
 }, 
 { 
