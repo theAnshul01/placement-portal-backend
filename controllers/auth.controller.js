@@ -1,4 +1,4 @@
-import brcypt from 'bcrypt'
+import bcrypt from 'bcrypt'
 import User from '../models/User.js'
 import {
     generateAccessToken,
@@ -76,7 +76,7 @@ export const login = async (req, res, next) => {
             })
         }
 
-        const isPasswordMatch = await brcypt.compare(
+        const isPasswordMatch = await bcrypt.compare(
             password,
             user.password
         )
@@ -233,7 +233,7 @@ export const resetPassword = async (req, res, next) => {
             })
         }
 
-        const hashedPassword = await brcypt.hash(newPassword, 10)
+        const hashedPassword = await bcrypt.hash(newPassword, 10)
 
         user.password = hashedPassword
 

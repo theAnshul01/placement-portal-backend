@@ -122,15 +122,15 @@ export const resendResetPasswordEmail = async (req, res, next) => {
     try {
         const { rollNumber } = req.body
 
-        if(!rollNumber){
+        if (!rollNumber) {
             return res.status(400).json({
                 message: "Roll Number is required"
             })
         }
 
-        const student = await Student.findOne({rollNumber}).lean().exec()
+        const student = await Student.findOne({ rollNumber }).lean().exec()
 
-        if(!student){
+        if (!student) {
             return res.status(404).json({
                 message: "Student not found"
             })
@@ -138,19 +138,19 @@ export const resendResetPasswordEmail = async (req, res, next) => {
 
         const user = await User.findById(student.userId).exec()
 
-        if(!user){
+        if (!user) {
             return res.status(404).json({
                 message: "User record not found for this student"
             })
         }
 
-        if(user.role != "STUDENT"){
+        if (user.role != "STUDENT") {
             return res.status(400).json({
                 message: "User is not a student"
             })
         }
 
-        if(user.isActive && user.verificationStatus === "VERIFIED"){
+        if (user.isActive && user.verificationStatus === "VERIFIED") {
             return res.status(400).json({
                 message: "Student is already active"
             })
@@ -173,6 +173,104 @@ export const resendResetPasswordEmail = async (req, res, next) => {
 
         res.status(200).json({
             message: "Reset password email resent successfully"
+        })
+
+    } catch (error) {
+        next(error)
+    }
+}
+
+export const getStudentProfile = async (req, res, next) => {
+    try {
+        const userId = req.user.id
+
+        const student = await Student.findOne({ userId })
+            .lean()
+            .exec()
+
+        if (!student) {
+            return res.status(404).json({
+                message: "Student profile not found"
+            })
+        }
+
+        const user = await User.findById(userId)
+            .select("name email role verificationStatus isActive")
+            .lean()
+            .exec()
+
+        res.status(200).json({
+            profile: {
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                verificationStatus: user.verificationStatus,
+                isActive: user.isActive,
+
+                rollNumber: student.rollNumber,
+                branch: student.branch,
+                isPlaced: student.isPlaced,
+
+                createdAt: student.createdAt,
+                updatedAt: student.updatedAt
+            }
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+export const updateStudentProfile = async (req, res, next) => {
+    try {
+        const userId = req.user.id
+
+        const allowedUpdates = [
+            'cgpa',
+            'skills'
+        ]
+
+        const updates = {}
+
+        for (const key of allowedUpdates) {
+            if (req.body[key] !== undefined) {
+                updates[key] = req.body[key]
+            }
+        }
+
+        // check if req,body was not empty - nothing updated
+        if (Object.keys(updates).length === 0) {
+            return res.status(400).json({
+                message: "No valid fields provided for update"
+            })
+        }
+
+        if (updates.skills && !Array.isArray(updates.skills)) {
+            return res.status(400).json({
+                message: "Skills must be an array"
+            })
+        }
+
+        const student = await Student.findOneAndUpdate(
+            { userId },          // student owns this profile
+            { $set: updates },   // partial update
+            { new: true }        // return updated document
+        ).lean()
+
+        if (!student) {
+            return res.status(404).json({
+                message: "Student profile not found"
+            })
+        }
+
+        res.status(200).json({
+            message: "Student profile updated successfully",
+            profile: {
+                rollNumber: student.rollNumber,
+                branch: student.branch,
+                cgpa: student.cgpa,
+                skills: student.skills,
+                updatedAt: student.updatedAt
+            }
         })
 
     } catch (error) {

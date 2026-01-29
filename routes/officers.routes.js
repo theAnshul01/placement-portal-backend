@@ -6,6 +6,7 @@ import upload from "../middleware/upload.js"
 import { createStudent, resendResetPasswordEmail } from "../controllers/student.controller.js"
 
 import { uploadStudentCSV } from "../controllers/studentBulk.controller.js"
+import { getUnverifiedRecruiters, getVerifiedRecruiters, verifyRecruiter } from "../controllers/recruiter.controller.js"
 
 const router = express.Router()
 
@@ -26,5 +27,10 @@ router.post("/students/upload",
 // create individual user - student 
 router.post("/students/createNew", createStudent)
 router.post("/students/resend-reset", resendResetPasswordEmail)
+
+// recruiter related
+router.patch("/recruiters/verify", verifyRecruiter)
+router.get("/recruiters/unverified", getUnverifiedRecruiters)
+router.get("/recruiters/verified", getVerifiedRecruiters)
 
 export default router
