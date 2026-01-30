@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import User from '../models/User.js'
 import bcrypt from 'bcrypt'
 
@@ -53,6 +54,12 @@ export const deactivateOfficer = async (req, res, next) => {
 
         const { officerId } = req.params
         const { reason } = req.body
+
+        if(!mongoose.Types.ObjectId.isValid(officerId)){
+            return res.status(400).json({
+                message: "Invalid officer id"
+            })
+        }
 
         const officer = await User.findById(officerId).exec()
 

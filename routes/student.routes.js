@@ -4,6 +4,7 @@ import verifyJWT from '../middleware/verifyJWT.js'
 import checkRole from '../middleware/checkRoles.js'
 
 import { getStudentProfile, updateStudentProfile } from '../controllers/student.controller.js'
+import { applyToJob, getMyApplication, withdrawApplication } from '../controllers/application.controller.js'
 
 const router = express.Router()
 
@@ -16,6 +17,9 @@ router.get("/ping", (req, res) => {
 
 router.get("/profile", getStudentProfile)
 router.patch("/profile", updateStudentProfile)
+router.post("/jobs/:jobId/apply", applyToJob)
+router.get("/applications", getMyApplication)
+router.patch("/applications/:applicationId/withdraw", withdrawApplication)
 
 export default router
 

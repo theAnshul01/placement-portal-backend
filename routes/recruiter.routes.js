@@ -4,6 +4,7 @@ import verifyJWT from '../middleware/verifyJWT.js'
 import checkRole from '../middleware/checkRoles.js'
 import { getRecruiterProfile, updateRecruiterProfile } from '../controllers/recruiter.controller.js'
 import { createJob, getRecruiterJobs, updateJob } from '../controllers/job.controller.js'
+import { getApplicationForJob, updateApplicationStatus } from '../controllers/application.controller.js'
 
 const router = express.Router()
 
@@ -19,7 +20,10 @@ router.patch("/profile", updateRecruiterProfile)
 
 // job related
 router.post("/jobs", createJob)
-router.patch("/jobs/:jobId", updateJob)
 router.get("/jobs", getRecruiterJobs)
+router.patch("/jobs/:jobId", updateJob)
+router.get("/jobs/:jobId/applications", getApplicationForJob)
+router.patch("/applications/:applicationId/status", updateApplicationStatus)
+
 
 export default router
