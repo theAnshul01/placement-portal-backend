@@ -5,6 +5,7 @@ import User from '../models/User.js'
 import Student from '../models/Student.js'
 import { generateResetToken, getResetTokenExpiry } from '../services/passwordReset.service.js'
 import { sendPasswordResetEmail } from '../services/email.service.js'
+import { FRONTEND_URL } from '../config/env.js'
 
 export const uploadStudentCSV = async (req, res, next) => {
     try {
@@ -76,7 +77,7 @@ export const uploadStudentCSV = async (req, res, next) => {
                             skills: skills ? skills.split("|") : []
                         })
 
-                        const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`
+                        const resetLink = `${FRONTEND_URL}/reset-password?token=${resetToken}`
 
                         await sendPasswordResetEmail({
                             to: email,
