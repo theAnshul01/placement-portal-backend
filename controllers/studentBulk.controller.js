@@ -7,10 +7,15 @@ import { generateResetToken, getResetTokenExpiry } from '../services/passwordRes
 import { sendPasswordResetEmail } from '../services/email.service.js'
 import { FRONTEND_URL } from '../config/env.js'
 
+/**
+ * @desc Upload students in bulk via CSV file
+ * @endpoint POST /api/officers/students/upload
+ * @access ADMIN, OFFICER
+ */
 export const uploadStudentCSV = async (req, res, next) => {
     try {
-        
-        if(!req.file){
+
+        if (!req.file) {
             return res.status(400).json({
                 message: "CSV file is required"
             })
@@ -26,11 +31,11 @@ export const uploadStudentCSV = async (req, res, next) => {
             })
             .on("end", async () => { //fired once the entire CSV file is read
                 let created = 0; //count of successfully created student
-                for(let i = 0; i < results.length; i++){
+                for (let i = 0; i < results.length; i++) {
                     const row = results[i]
 
                     try {
-                        
+
                         const {
                             name,
                             email,
@@ -40,17 +45,17 @@ export const uploadStudentCSV = async (req, res, next) => {
                             skills
                         } = row
 
-                        if(!name || !email || !rollNumber || !branch){
+                        if (!name || !email || !rollNumber || !branch) {
                             throw new Error("Missing required fields")
                         }
 
                         const existingUser = await User.findOne({ email })
-                        if(existingUser){
+                        if (existingUser) {
                             throw new Error("Duplicate email")
                         }
 
                         const existingRoll = await Student.findOne({ rollNumber })
-                        if(existingRoll){
+                        if (existingRoll) {
                             throw new Error("Duplicate roll number")
                         }
 
@@ -89,7 +94,7 @@ export const uploadStudentCSV = async (req, res, next) => {
 
                     } catch (error) {
                         errors.push({
-                            row: i+1, //CSV row number
+                            row: i + 1, //CSV row number
                             reason: error.message
                         })
                     }

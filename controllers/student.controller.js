@@ -8,6 +8,11 @@ import { FRONTEND_URL } from '../config/env.js'
 
 
 
+/**
+ * @desc Create a new student
+ * @endpoint POST /api/officers/students/createNew
+ * @access ADMIN, OFFICER
+ */
 export const createStudent = async (req, res, next) => {
 
     // starting a mongoDB session for transaction
@@ -119,6 +124,11 @@ export const createStudent = async (req, res, next) => {
     }
 }
 
+/**
+ * @desc Resend password reset email for a student
+ * @endpoint POST /api/officers/students/resend-reset
+ * @access ADMIN, OFFICER
+ */
 export const resendResetPasswordEmail = async (req, res, next) => {
     try {
         const { rollNumber } = req.body
@@ -181,6 +191,11 @@ export const resendResetPasswordEmail = async (req, res, next) => {
     }
 }
 
+/**
+ * @desc Get student profile details
+ * @endpoint GET /api/student/profile
+ * @access STUDENT
+ */
 export const getStudentProfile = async (req, res, next) => {
     try {
         const userId = req.user.id
@@ -221,6 +236,11 @@ export const getStudentProfile = async (req, res, next) => {
     }
 }
 
+/**
+ * @desc Update student profile details
+ * @endpoint PATCH /api/student/profile
+ * @access STUDENT
+ */
 export const updateStudentProfile = async (req, res, next) => {
     try {
         const userId = req.user.id

@@ -7,11 +7,16 @@ import {
 import jwt from 'jsonwebtoken'
 import { REFRESH_TOKEN_SECRET } from '../config/env.js'
 
+/**
+ * @desc Create a new admin user
+ * @endpoint POST /api/bootstrap/admin
+ * @access ADMIN
+ */
 export const createAdmin = async (req, res, next) => {
     try {
         const { name, email, password } = req.body;
-        
-        if(!name || !email || !password) {
+
+        if (!name || !email || !password) {
             return res.status(400).json({
                 message: "All fields are required"
             })
@@ -19,7 +24,7 @@ export const createAdmin = async (req, res, next) => {
 
         const existingUser = await User.findOne({ email }).exec()
 
-        if(existingUser){
+        if (existingUser) {
             return res.status(409).json({
                 message: "Admin already exists"
             })
@@ -46,11 +51,16 @@ export const createAdmin = async (req, res, next) => {
     }
 }
 
+/**
+ * @desc User login - returns access token and refresh token
+ * @endpoint POST /api/auth/login
+ * @access STUDENT, ADMIN, OFFICER, RECRUITER
+ */
 export const login = async (req, res, next) => {
     try {
         const { email, password } = req.body
 
-        if(!email || !password){
+        if (!email || !password) {
             return res.status(400).json({
                 message: "All fields are required"
             })
@@ -58,19 +68,19 @@ export const login = async (req, res, next) => {
 
         const user = await User.findOne({ email }).exec()
 
-        if(!user){
+        if (!user) {
             return res.status(401).json({
                 message: "Invalid credentials"
             })
         }
 
-        if(!user.isActive){
+        if (!user.isActive) {
             return res.status(403).json({
                 message: "User is inactive"
             })
         }
 
-        if(user.verificationStatus !== "VERIFIED"){
+        if (user.verificationStatus !== "VERIFIED") {
             return res.status(403).json({
                 message: "User is not verified"
             })
@@ -81,7 +91,7 @@ export const login = async (req, res, next) => {
             user.password
         )
 
-        if(!isPasswordMatch){
+        if (!isPasswordMatch) {
             return res.status(401).json({
                 message: "Invalid Credentials"
             })
@@ -108,7 +118,7 @@ export const login = async (req, res, next) => {
         })
 
         res.status(200).json({
-            accessToken, 
+            accessToken,
             user: {
                 id: user._id,
                 name: user.name,
@@ -122,11 +132,16 @@ export const login = async (req, res, next) => {
     }
 }
 
+/**
+ * @desc Refresh access token using refresh token from cookies
+ * @endpoint GET /api/auth/refresh
+ * @access STUDENT, ADMIN, OFFICER, RECRUITER
+ */
 export const refresh = async (req, res, next) => {
     try {
         const cookies = req.cookies
 
-        if(!cookies?.jwt){
+        if (!cookies?.jwt) {
             return res.status(401).json({
                 message: "No refresh token found"
             })
@@ -138,7 +153,7 @@ export const refresh = async (req, res, next) => {
             refreshToken,
             REFRESH_TOKEN_SECRET,
             async (err, decoded) => {
-                if(err) {
+                if (err) {
                     return res.status(403).json({
                         message: "Invalid refresh token"
                     })
@@ -146,13 +161,13 @@ export const refresh = async (req, res, next) => {
 
                 const user = await User.findById(decoded.id).lean().exec()
 
-                if(!user || user.refreshToken !== refreshToken){
+                if (!user || user.refreshToken !== refreshToken) {
                     return res.status(403).json({
                         message: "Refresh token mismatch"
                     })
                 }
 
-                if(!user.isActive){
+                if (!user.isActive) {
                     return res.status(403).json({
                         message: "User is inactive"
                     })
@@ -176,11 +191,16 @@ export const refresh = async (req, res, next) => {
     }
 }
 
+/**
+ * @desc User logout - clears refresh token from database and cookies
+ * @endpoint POST /api/auth/logout
+ * @access STUDENT, ADMIN, OFFICER, RECRUITER
+ */
 export const logout = async (req, res, next) => {
     try {
         const cookies = req.cookies
 
-        if(!cookies?.jwt){
+        if (!cookies?.jwt) {
             // no cookie exist -> already logged out
             return res.sendStatus(204)
         }
@@ -189,7 +209,7 @@ export const logout = async (req, res, next) => {
 
         const user = await User.findOne({ refreshToken }).exec()
 
-        if(user){
+        if (user) {
             user.refreshToken = null
             await user.save()
         }
@@ -208,26 +228,31 @@ export const logout = async (req, res, next) => {
     }
 }
 
+/**
+ * @desc Reset user password using reset token
+ * @endpoint POST /api/auth/reset-password
+ * @access STUDENT, ADMIN, OFFICER, RECRUITER
+ */
 export const resetPassword = async (req, res, next) => {
     try {
         const { token, newPassword } = req.body
 
-        if(!token || !newPassword){
+        if (!token || !newPassword) {
             return res.status(400).json({
                 message: "Token and new password are required"
             })
         }
 
         // find user by reset token
-        const user = await User.findOne({ resetPasswordToken : token }).exec()
+        const user = await User.findOne({ resetPasswordToken: token }).exec()
 
-        if(!user){
+        if (!user) {
             return res.status(400).json({
                 message: "Invalid or already used reset token"
             })
         }
 
-        if(user?.resetPasswordExpiresAt < Date.now()){
+        if (user?.resetPasswordExpiresAt < Date.now()) {
             return res.status(400).json({
                 message: "Reset token has expired"
             })

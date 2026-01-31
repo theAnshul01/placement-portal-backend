@@ -2,18 +2,23 @@ import mongoose from 'mongoose';
 import User from '../models/User.js'
 import bcrypt from 'bcrypt'
 
+/**
+ * @desc Create a new officer user
+ * @endpoint POST /api/admin/officers
+ * @access ADMIN
+ */
 export const createOfficer = async (req, res, next) => {
     try {
         const { name, email, password } = req.body;
 
-        if(!name || !email || !password){
+        if (!name || !email || !password) {
             return res.status(400).json({
                 message: "All fields are required"
             })
         }
 
-        const existingUser = await User.findOne({email}).lean().exec()
-        if(existingUser){
+        const existingUser = await User.findOne({ email }).lean().exec()
+        if (existingUser) {
             return res.status(409).json({
                 message: "Officer with this email already exists"
             })
@@ -49,13 +54,18 @@ export const createOfficer = async (req, res, next) => {
 }
 
 
+/**
+ * @desc Deactivate an officer
+ * @endpoint PATCH /api/admin/officers/:officerId/deactivate
+ * @access ADMIN
+ */
 export const deactivateOfficer = async (req, res, next) => {
     try {
 
         const { officerId } = req.params
         const { reason } = req.body
 
-        if(!mongoose.Types.ObjectId.isValid(officerId)){
+        if (!mongoose.Types.ObjectId.isValid(officerId)) {
             return res.status(400).json({
                 message: "Invalid officer id"
             })
@@ -63,19 +73,19 @@ export const deactivateOfficer = async (req, res, next) => {
 
         const officer = await User.findById(officerId).exec()
 
-        if(!officer){
+        if (!officer) {
             return res.status(404).json({
                 message: "officer not found"
             })
         }
 
-        if(officer.role != "OFFICER"){
+        if (officer.role != "OFFICER") {
             return res.status(400).json({
                 message: "Targeted user is not an officer"
             })
         }
 
-        if(!officer.isActive){
+        if (!officer.isActive) {
             return res.status(409).json({
                 message: "Officer is alread deactivated"
             })
@@ -103,10 +113,21 @@ export const deactivateOfficer = async (req, res, next) => {
     }
 }
 
+/**
+ * @desc Reactivate a deactivated officer
+ * @endpoint PATCH /api/admin/officers/:officerId/reactivate
+ * @access ADMIN
+ */
 export const reactivateOfficer = async (req, res, next) => {
     try {
 
         const { officerId } = req.params
+
+        if (!mongoose.Types.ObjectId.isValid(officerId)) {
+            return res.status(400).json({
+                message: "Invalid officer id"
+            })
+        }
 
         const officer = await User.findById(officerId).exec()
 

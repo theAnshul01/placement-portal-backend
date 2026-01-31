@@ -2,6 +2,11 @@ import bcrypt from 'bcrypt'
 import User from '../models/User.js'
 import Recruiter from '../models/Recruiter.js'
 
+/**
+ * @desc Register a new recruiter
+ * @endpoint POST /api/auth/recruiter/signup
+ * @access RECRUITER
+ */
 export const recruiterSignup = async (req, res, next) => {
     try {
 
@@ -79,6 +84,11 @@ export const recruiterSignup = async (req, res, next) => {
     }
 }
 
+/**
+ * @desc Verify a recruiter account
+ * @endpoint PATCH /api/officers/recruiters/verify
+ * @access ADMIN, OFFICER
+ */
 export const verifyRecruiter = async (req, res, next) => {
     try {
         const { companyName, recruitingYear } = req.body;
@@ -134,6 +144,11 @@ export const verifyRecruiter = async (req, res, next) => {
     }
 }
 
+/**
+ * @desc Get all unverified recruiters with pagination and filters
+ * @endpoint GET /api/officers/recruiters/unverified
+ * @access ADMIN, OFFICER
+ */
 export const getUnverifiedRecruiters = async (req, res, next) => {
     try {
 
@@ -200,6 +215,11 @@ export const getUnverifiedRecruiters = async (req, res, next) => {
     }
 }
 
+/**
+ * @desc Get all verified recruiters with pagination and filters
+ * @endpoint GET /api/officers/recruiters/verified
+ * @access ADMIN, OFFICER
+ */
 export const getVerifiedRecruiters = async (req, res, next) => {
     try {
 
@@ -262,6 +282,11 @@ export const getVerifiedRecruiters = async (req, res, next) => {
     }
 }
 
+/**
+ * @desc Get recruiter profile details
+ * @endpoint GET /api/recruiter/profile
+ * @access RECRUITER
+ */
 export const getRecruiterProfile = async (req, res, next) => {
     try {
         const userId = req.user.id //from JWT middleware
@@ -313,6 +338,11 @@ export const getRecruiterProfile = async (req, res, next) => {
     }
 }
 
+/**
+ * @desc Update recruiter profile details
+ * @endpoint PATCH /api/recruiter/profile
+ * @access RECRUITER
+ */
 export const updateRecruiterProfile = async (req, res, next) => {
     try {
         const userId = req.user.id

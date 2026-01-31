@@ -7,6 +7,7 @@ import { createStudent, resendResetPasswordEmail } from "../controllers/student.
 
 import { uploadStudentCSV } from "../controllers/studentBulk.controller.js"
 import { getUnverifiedRecruiters, getVerifiedRecruiters, verifyRecruiter } from "../controllers/recruiter.controller.js"
+import { getBranchWisePlacements, getJobWiseFunnel, getPlacementOverview } from "../controllers/statistics.controller.js"
 
 const router = express.Router()
 
@@ -32,5 +33,10 @@ router.post("/students/resend-reset", resendResetPasswordEmail)
 router.patch("/recruiters/verify", verifyRecruiter)
 router.get("/recruiters/unverified", getUnverifiedRecruiters)
 router.get("/recruiters/verified", getVerifiedRecruiters)
+
+// placement analytics
+router.get("/statistics/overview", getPlacementOverview)
+router.get("/statistics/branchwise", getBranchWisePlacements)
+router.get("/statistics/job-funnel", getJobWiseFunnel)
 
 export default router
