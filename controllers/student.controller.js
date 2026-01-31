@@ -3,6 +3,7 @@ import { generateResetToken, getResetTokenExpiry } from '../services/passwordRes
 import User from '../models/User.js'
 import Student from '../models/Student.js'
 import { sendPasswordResetEmail } from '../services/email.service.js'
+import { FRONTEND_URL } from '../config/env.js'
 // import mongoose from 'mongoose' //!use when using MongoDB atlas - transaction not supported on local instance
 
 
@@ -91,7 +92,7 @@ export const createStudent = async (req, res, next) => {
         })
 
 
-        const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`
+        const resetLink = `${FRONTEND_URL}/reset-password?token=${resetToken}`
 
         await sendPasswordResetEmail({
             to: email,
@@ -163,7 +164,7 @@ export const resendResetPasswordEmail = async (req, res, next) => {
 
         await user.save()
 
-        const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`
+        const resetLink = `${FRONTEND_URL}/reset-password?token=${resetToken}`
 
         await sendPasswordResetEmail({
             to: user.email,

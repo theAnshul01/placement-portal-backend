@@ -1,10 +1,11 @@
 import SibApiV3Sdk from 'sib-api-v3-sdk'
+import { BREVO_API_KEY, BREVO_SENDER_EMAIL, BREVO_SENDER_NAME } from '../config/env.js'
 
 const client = SibApiV3Sdk.ApiClient.instance
 
 // Configure API key
 const apiKey = client.authentications['api-key']
-apiKey.apiKey = process.env.BREVO_API_KEY
+apiKey.apiKey = BREVO_API_KEY
 
 
 const transactionalEmailApi = new SibApiV3Sdk.TransactionalEmailsApi()
@@ -17,8 +18,8 @@ export const sendPasswordResetEmail = async ({
     try {
         const emailData = {
             sender: {
-                email: process.env.BREVO_SENDER_EMAIL,
-                name: process.env.BREVO_SENDER_NAME
+                email: BREVO_SENDER_EMAIL,
+                name: BREVO_SENDER_NAME
             },
             to: [
                 {
