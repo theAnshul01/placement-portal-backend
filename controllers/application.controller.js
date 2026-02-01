@@ -102,8 +102,8 @@ export const getMyApplication = async (req, res, next) => {
     try {
         const userId = req.user.id
 
-        const page = req.query.page || 1
-        const limit = req.query.limit || 10
+        const page = Math.max(Number(req.query.page) || 1, 1)
+        const limit = Math.min(Number(req.query.limit) || 10, 50)
         const skip = (page - 1) * 10
 
         const student = await Student.findOne({ userId }).lean().exec()
@@ -164,8 +164,8 @@ export const getApplicationForJob = async (req, res, next) => {
             })
         }
 
-        const page = req.query.page || 1
-        const limit = req.query.limit || 10
+        const page = Math.max(Number(req.query.page) || 1, 1)
+        const limit = Math.min(Number(req.query.limit) || 10, 50)
         const skip = (page - 1) * 10
 
         const recruiter = await Recruiter.findOne({ userId }).lean().exec()

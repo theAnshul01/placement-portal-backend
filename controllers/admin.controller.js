@@ -71,6 +71,12 @@ export const deactivateOfficer = async (req, res, next) => {
             })
         }
 
+        if(!reason){
+            return res.status(400).json({
+                message: "Reason is required field"
+            })
+        }
+
         const officer = await User.findById(officerId).exec()
 
         if (!officer) {

@@ -9,8 +9,11 @@ import studentRoutes from '../routes/student.routes.js'
 import recruiterRoutes from '../routes/recruiter.routes.js'
 import officerRoutes from '../routes/officers.routes.js'
 import jobRoutes from '../routes/job.routes.js'
+import httpLogger from '../logger/httpLogger.js'
 
 const app = express()
+
+app.use(httpLogger)
 
 // parse JSON body
 app.use(express.json())
@@ -33,7 +36,7 @@ app.use("/api/recruiter", recruiterRoutes)
 app.use("/api/officer", officerRoutes)
 app.use("/jobs", jobRoutes)
 
-//! error handler at last to catch failures
+// error catching
 app.use(errorHandler)
 
 export default app
