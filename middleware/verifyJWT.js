@@ -17,7 +17,7 @@ const verifyJWT = (req, res, next) => {
         ACCESS_TOKEN_SECRET,
         (err, decoded) => {
             if(err){
-                res.status(403).json({
+                return res.status(403).json({
                     message: "Invalid or expired token" 
                 })
             }

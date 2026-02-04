@@ -1,7 +1,10 @@
 import { errorLogger } from '../logger/errorLogger.js'
 
 const errorHandler = (err, req, res, next) => {
-    
+    if (res.headersSent) {
+        return next(err)
+    }
+
     errorLogger.error({
         message: err.message,
         stack: err.stack,
