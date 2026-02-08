@@ -1,7 +1,7 @@
 import express from "express"
 import verifyJWT from "../middleware/verifyJWT.js"
 import checkRole from "../middleware/checkRoles.js"
-import { createOfficer, deactivateOfficer, reactivateOfficer } from "../controllers/admin.controller.js"
+import { createOfficer, deactivateOfficer, deactivateStudent, getAllOfficers, getAllStudents, reactivateOfficer, reactivateStudent } from "../controllers/admin.controller.js"
 
 const router = express.Router()
 
@@ -9,6 +9,10 @@ router.use(verifyJWT)
 router.use(checkRole("ADMIN"))
 
 // create officers
+router.get("/students", getAllStudents)
+router.patch("/students/:studentId/deactivate", deactivateStudent)
+router.patch("/students/:studentId/reactivate", reactivateStudent)
+router.get("/officers", getAllOfficers)
 router.post("/officers", createOfficer)
 router.patch("/officers/:officerId/deactivate", deactivateOfficer)
 router.patch("/officers/:officerId/reactivate", reactivateOfficer)
