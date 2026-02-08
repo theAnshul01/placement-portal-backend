@@ -32,14 +32,14 @@ export const createStudent = async (req, res, next) => {
 
         const existingUser = await User.findOne({ email }).lean().exec()
         if (existingUser) {
-            return res.status(400).json({
+            return res.status(409).json({
                 message: "Student with this email already exists."
             })
         }
 
         const existingRoll = await Student.findOne({ rollNumber }).lean().exec()
         if (existingRoll) {
-            return res.status(400).json({
+            return res.status(409).json({
                 message: "Student with this roll number already exists."
             })
         }
@@ -226,6 +226,8 @@ export const getStudentProfile = async (req, res, next) => {
                 rollNumber: student.rollNumber,
                 branch: student.branch,
                 isPlaced: student.isPlaced,
+                cgpa: student.cgpa,
+                skills: student.skills,
 
                 createdAt: student.createdAt,
                 updatedAt: student.updatedAt

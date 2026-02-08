@@ -30,7 +30,7 @@ export const createAdmin = async (req, res, next) => {
             })
         }
 
-        const hashedPassword = await brcypt.hash(password, 10)
+        const hashedPassword = await bcrypt.hash(password, 10)
 
         const admin = await User.create({
             name,
