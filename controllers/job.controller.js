@@ -264,3 +264,57 @@ export const getOpenJobs = async (req, res, next) => {
         next(error)
     }
 }
+
+/**
+ * @desc Get the details of a particular job with job Id
+ * @endpoint GET /api/job/:jobId
+ * @access RECRUITER
+ */
+export const getJobById = async (req, res, next) => {
+    try {
+        
+        const {jobId} = req.params
+        // console.log(jobId)
+        const userId = req.user.id
+        // console.log(recruiterId)
+        // console.log(typeof recruiterId)
+        // console.log(typeof jobId)
+
+        if(!mongoose.Types.ObjectId.isValid(jobId)){
+            return res.status(400).json({
+                message: "Invalid Job Id"
+            })
+        }
+
+        if(!mongoose.Types.ObjectId.isValid(userId)){
+            return res.status(400).json({
+                message: "Invalid user id"
+            })
+        }
+
+        const job = await Job.findById(jobId)
+        const recruiter = await Recruiter.findOne({
+            userId: userId
+        })
+        const recruiterId = recruiter._id
+
+        if(!job){
+            return res.status(404).json({
+                message: "Job not found"
+            })
+        }
+
+        if(recruiterId.toString() !== job.recruiterId.toString()){
+            return res.status(403).json({
+                message: "Recruiter not authorized to view this job"
+            })
+        }
+
+        return res.status(200).json({
+            job
+        })
+
+    } catch (error) {
+        next(error)
+    }
+}

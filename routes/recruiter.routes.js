@@ -3,7 +3,7 @@ import express from 'express'
 import verifyJWT from '../middleware/verifyJWT.js'
 import checkRole from '../middleware/checkRoles.js'
 import { getRecruiterProfile, updateRecruiterProfile } from '../controllers/recruiter.controller.js'
-import { createJob, getRecruiterJobs, updateJob } from '../controllers/job.controller.js'
+import { createJob, getJobById, getRecruiterJobs, updateJob } from '../controllers/job.controller.js'
 import { getApplicationForJob, updateApplicationStatus } from '../controllers/application.controller.js'
 import { applicationStatusLimiter } from '../middleware/rateLimiter.js'
 
@@ -22,6 +22,7 @@ router.patch("/profile", updateRecruiterProfile)
 // job related
 router.post("/jobs", createJob)
 router.get("/jobs", getRecruiterJobs)
+router.get("/jobs/:jobId", getJobById)
 router.patch("/jobs/:jobId", updateJob)
 router.get("/jobs/:jobId/applications", getApplicationForJob)
 router.patch("/applications/:applicationId/status", applicationStatusLimiter, updateApplicationStatus)

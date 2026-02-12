@@ -103,7 +103,7 @@ export const verifyRecruiter = async (req, res, next) => {
 
         if (!recruiter) {
             return res.status(404).json({
-                message: "Recruiter not foudn for given company and year"
+                message: "Recruiter not found for given company and year"
             })
         }
 
