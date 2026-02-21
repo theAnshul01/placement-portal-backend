@@ -4,6 +4,7 @@ import User from '../models/User.js'
 import Student from '../models/Student.js'
 import { sendPasswordResetEmail } from '../services/email.service.js'
 import { FRONTEND_URL } from '../config/env.js'
+import { generateSignedUrl } from "../utils/s3SignedUrl.js"
 // import mongoose from 'mongoose' //!use when using MongoDB atlas - transaction not supported on local instance
 
 
@@ -215,6 +216,13 @@ export const getStudentProfile = async (req, res, next) => {
             .lean()
             .exec()
 
+        
+        let resumeUrl = null
+
+        if (student.resume?.storagePath) {
+            resumeUrl = await generateSignedUrl(student.resume.storagePath)
+        }
+
         res.status(200).json({
             profile: {
                 name: user.name,
@@ -228,6 +236,15 @@ export const getStudentProfile = async (req, res, next) => {
                 isPlaced: student.isPlaced,
                 cgpa: student.cgpa,
                 skills: student.skills,
+
+                resume: student.resume
+                    ? {
+                        fileName: student.resume.fileName,
+                        fileType: student.resume.fileType,
+                        fileSize: student.resume.fileSize,
+                        url: resumeUrl
+                    }
+                    : null,
 
                 createdAt: student.createdAt,
                 updatedAt: student.updatedAt
