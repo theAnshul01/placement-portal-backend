@@ -87,70 +87,128 @@ export const getPlacementOverview = async (req, res, next) => {
 */
 export const getBranchWisePlacements = async (req, res, next) => {
     try {
-        const branchWiseStats = await Student.aggregate([
-            // Stage 1
+
+        const result = await Student.aggregate([
+
             {
-                $group: {
-                    _id: "$branch",
+                $facet: {
 
-                    totalStudents: { $sum: 1 },
+                    // ==============================
+                    // 1️⃣ Branch Wise Stats
+                    // ==============================
+                    branchWiseStats: [
 
-                    placedStudents: {
-                        $sum: {
-                            $cond: [
-                                { $eq: ["$isPlaced", true] },
-                                1,
-                                0
-                            ]
-                        }
-                    }
-                }
-            },
-
-            // Stage 2
-            {
-                $addFields: {
-                    unPlacedStudents: {
-                        $subtract: ["$totalStudents", "$placedStudents"]
-                    },
-
-                    placementPercentage: {
-                        $cond: [
-                            { $eq: ["$totalStudents", 0] },
-                            0,
-                            {
-                                $multiply: [
-                                    { $divide: ["$placedStudents", "$totalStudents"] },
-                                    100
-                                ]
+                        {
+                            $group: {
+                                _id: "$branch",
+                                totalStudents: { $sum: 1 },
+                                placedStudents: {
+                                    $sum: {
+                                        $cond: [{ $eq: ["$isPlaced", true] }, 1, 0]
+                                    }
+                                }
                             }
-                        ]
-                    }
-                }
-            },
+                        },
 
-            // stage 3 format output
-            {
-                $project: {
-                    _id: 0,
-                    branch: "$_id",
-                    totalStudents: 1,
-                    placedStudents: 1,
-                    unplacedStudents: 1,
-                    placementPercentage: {
-                        $round: ["$placementPercentage", 2]
-                    }
-                }
-            },
+                        {
+                            $addFields: {
+                                unplacedStudents: {
+                                    $subtract: ["$totalStudents", "$placedStudents"]
+                                },
+                                placementPercentage: {
+                                    $cond: [
+                                        { $eq: ["$totalStudents", 0] },
+                                        0,
+                                        {
+                                            $multiply: [
+                                                { $divide: ["$placedStudents", "$totalStudents"] },
+                                                100
+                                            ]
+                                        }
+                                    ]
+                                }
+                            }
+                        },
 
-            // stage 4
-            {
-                $sort: { placementPercentage: -1 }
+                        {
+                            $project: {
+                                _id: 0,
+                                branch: "$_id",
+                                totalStudents: 1,
+                                placedStudents: 1,
+                                unplacedStudents: 1,
+                                placementPercentage: {
+                                    $round: ["$placementPercentage", 2]
+                                }
+                            }
+                        },
+
+                        { $sort: { placementPercentage: -1 } }
+
+                    ],
+
+                    // ==============================
+                    // 2️⃣ Overall Summary
+                    // ==============================
+                    overallStats: [
+
+                        {
+                            $group: {
+                                _id: null,
+                                totalStudents: { $sum: 1 },
+                                totalPlaced: {
+                                    $sum: {
+                                        $cond: [{ $eq: ["$isPlaced", true] }, 1, 0]
+                                    }
+                                }
+                            }
+                        },
+
+                        {
+                            $addFields: {
+                                overallPlacementPercentage: {
+                                    $cond: [
+                                        { $eq: ["$totalStudents", 0] },
+                                        0,
+                                        {
+                                            $multiply: [
+                                                { $divide: ["$totalPlaced", "$totalStudents"] },
+                                                100
+                                            ]
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+
+                        {
+                            $project: {
+                                _id: 0,
+                                totalStudents: 1,
+                                totalPlaced: 1,
+                                overallPlacementPercentage: {
+                                    $round: ["$overallPlacementPercentage", 2]
+                                }
+                            }
+                        }
+                    ]
+
+                }
             }
         ])
 
+        const branchWiseStats = result[0].branchWiseStats
+        const overallStats = result[0].overallStats[0] || {
+            totalStudents: 0,
+            totalPlaced: 0,
+            overallPlacementPercentage: 0
+        }
+
         res.status(200).json({
             totalBranches: branchWiseStats.length,
+            totalStudents: overallStats.totalStudents,
+            totalPlaced: overallStats.totalPlaced,
+            overallPlacementPercentage: overallStats.overallPlacementPercentage,
             branches: branchWiseStats
         })
 

@@ -220,9 +220,12 @@ export const getOpenJobs = async (req, res, next) => {
 
         const { branch, minCgpa, jobType } = req.query
 
+        const todayStart = new Date()
+        todayStart.setHours(0, 0, 0, 0)
+
         const filter = {
             status: "OPEN",
-            deadline: { $gte: new Date() }
+            deadline: { $gte: todayStart }
         }
 
         if (jobType) {
