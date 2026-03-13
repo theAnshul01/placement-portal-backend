@@ -9,7 +9,7 @@ const errorHandler = (err, req, res, next) => {
         message: err.message,
         stack: err.stack,
         method: req.method,
-        url: req.originUrl,
+        url: req.originalUrl,
         user: req.user?.id || null
     })
 
