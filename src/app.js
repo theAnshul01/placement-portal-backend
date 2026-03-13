@@ -10,6 +10,7 @@ import recruiterRoutes from '../routes/recruiter.routes.js'
 import officerRoutes from '../routes/officers.routes.js'
 import jobRoutes from '../routes/job.routes.js'
 import httpLogger from '../logger/httpLogger.js'
+import { FRONTEND_URL } from '../config/env.js'
 
 const app = express()
 
@@ -23,7 +24,8 @@ app.use(cookieParser())
 
 // enable CORS
 app.use(cors({
-    origin: true,
+    origin: FRONTEND_URL,
+    methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
 }))
 

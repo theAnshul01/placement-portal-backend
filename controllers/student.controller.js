@@ -17,11 +17,11 @@ import { generateSignedUrl } from "../utils/s3SignedUrl.js"
 export const createStudent = async (req, res, next) => {
 
     // starting a mongoDB session for transaction
-    // const session = await mongoose.startSession() //!use when using MongoDB atlas - transaction not supported on local instance
+    const session = await mongoose.startSession() //!use when using MongoDB atlas - transaction not supported on local instance
 
     try {
 
-        // session.startTransaction() //!use when using MongoDB atlas - transaction not supported on local instance
+        session.startTransaction() //!use when using MongoDB atlas - transaction not supported on local instance
 
         const { name, email, rollNumber, branch, cgpa, skills } = req.body
 
@@ -51,34 +51,7 @@ export const createStudent = async (req, res, next) => {
 
         // !commented code is a part of transaction and hence use it when using MongoDB atlas
         // part of transaction
-        // const user = await User.create([{
-        //     name,
-        //     email,
-        //     password: hashedPassword,
-        //     role: 'STUDENT',
-        //     verificationStatus: "PENDING",
-        //     isActive: false,
-        //     resetPasswordToken: resetToken,
-        //     resetPasswordExpiresAt: getResetTokenExpiry()
-        // }], { session })
-
-        // // user is returned as an array when using create with session hence need to get the user out of user array with size 1
-
-        // const createdUser = user[0]
-
-        // const student = await Student.create([{
-        //     userId: createdUser._id,
-        //     rollNumber,
-        //     branch,
-        //     cgpa,
-        //     skills: Array.isArray(skills) ? skills : []
-        // }], { session })
-
-        // await session.commitTransaction()//!use when using MongoDB atlas - transaction not supported on local instance
-        // session.endSession()//!use when using MongoDB atlas - transaction not supported on local instance
-
-        // part of transaction
-        const user = await User.create({
+        const user = await User.create([{
             name,
             email,
             password: hashedPassword,
@@ -87,15 +60,42 @@ export const createStudent = async (req, res, next) => {
             isActive: false,
             resetPasswordToken: resetToken,
             resetPasswordExpiresAt: getResetTokenExpiry()
-        })
+        }], { session })
 
-        const student = await Student.create({
-            userId: user._id,
+        // user is returned as an array when using create with session hence need to get the user out of user array with size 1
+
+        const createdUser = user[0]
+
+        const student = await Student.create([{
+            userId: createdUser._id,
             rollNumber,
             branch,
             cgpa,
             skills: Array.isArray(skills) ? skills : []
-        })
+        }], { session })
+
+        await session.commitTransaction()//!use when using MongoDB atlas - transaction not supported on local instance
+        session.endSession()//!use when using MongoDB atlas - transaction not supported on local instance
+
+        // part of transaction
+        // const user = await User.create({
+        //     name,
+        //     email,
+        //     password: hashedPassword,
+        //     role: 'STUDENT',
+        //     verificationStatus: "PENDING",
+        //     isActive: false,
+        //     resetPasswordToken: resetToken,
+        //     resetPasswordExpiresAt: getResetTokenExpiry()
+        // })
+
+        // const student = await Student.create({
+        //     userId: user._id,
+        //     rollNumber,
+        //     branch,
+        //     cgpa,
+        //     skills: Array.isArray(skills) ? skills : []
+        // })
 
 
         const resetLink = `${FRONTEND_URL}/reset-password?token=${resetToken}`
@@ -119,8 +119,8 @@ export const createStudent = async (req, res, next) => {
 
     } catch (error) {
         //  MongoDB atlas - If something fails - rollback everything
-        // await session.abortTransaction()//!use when using MongoDB atlas - transaction not supported on local instance
-        // session.endSession()//!use when using MongoDB atlas - transaction not supported on local instance
+        await session.abortTransaction()//!use when using MongoDB atlas - transaction not supported on local instance
+        session.endSession()//!use when using MongoDB atlas - transaction not supported on local instance
         next(error)
     }
 }
