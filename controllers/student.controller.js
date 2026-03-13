@@ -119,7 +119,9 @@ export const createStudent = async (req, res, next) => {
 
     } catch (error) {
         //  MongoDB atlas - If something fails - rollback everything
-        await session.abortTransaction()//!use when using MongoDB atlas - transaction not supported on local instance
+        if(session.inTransaction()){
+            await session.abortTransaction()//!use when using MongoDB atlas - transaction not supported on local instance
+        }
         session.endSession()//!use when using MongoDB atlas - transaction not supported on local instance
         next(error)
     }
