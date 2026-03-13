@@ -5,7 +5,7 @@ import Student from '../models/Student.js'
 import { sendPasswordResetEmail } from '../services/email.service.js'
 import { FRONTEND_URL } from '../config/env.js'
 import { generateSignedUrl } from "../utils/s3SignedUrl.js"
-// import mongoose from 'mongoose' //!use when using MongoDB atlas - transaction not supported on local instance
+import mongoose from 'mongoose' //!use when using MongoDB atlas - transaction not supported on local instance
 
 
 
